@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab 3 - Date</title>
+    <script src="lab3_lib.js"></script>
+    <script src="lab3.js" defer></script>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        td, th { border: 1px solid gray; padding: 8px; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+
+<h2>Лабораторна робота №3</h2>
+
+<table>
+<tr>
+    <th>Завдання</th>
+    <th>Дія</th>
+    <th>Результат</th>
+</tr>
+
+<!-- 1 -->
+<tr>
+    <td>1. Поточна дата і час</td>
+    <td><button onclick="showCurrentDate()">Виконати</button></td>
+    <td id="result1"></td>
+</tr>
+
+<!-- 2 -->
+<tr>
+    <td>2. День тижня (об’єкт)</td>
+    <td><button onclick="task2()">Виконати</button></td>
+    <td id="result2"></td>
+</tr>
+
+<!-- 3 -->
+<tr>
+    <td>
+        3. N днів назад <br>
+        <input type="text" id="daysAgo" placeholder="Введіть N">
+    </td>
+    <td><button onclick="task3()">Виконати</button></td>
+    <td id="result3"></td>
+</tr>
+
+<!-- 4 -->
+<tr>
+    <td>
+        4. Останній день місяця <br>
+        Рік: <input type="text" id="year">
+        Місяць (1-12): <input type="text" id="month">
+    </td>
+    <td><button onclick="task4()">Виконати</button></td>
+    <td id="result4"></td>
+</tr>
+
+<!-- 5 -->
+<tr>
+    <td>5. Секунди сьогодні</td>
+    <td><button onclick="task5()">Виконати</button></td>
+    <td id="result5"></td>
+</tr>
+
+<!-- 6 -->
+<tr>
+    <td>6. Формат ДД.ММ.РРРР</td>
+    <td><button onclick="task6()">Виконати</button></td>
+    <td id="result6"></td>
+</tr>
+
+<!-- 7 -->
+<tr>
+    <td>
+        7. Різниця між датами <br>
+        Дата 1: <input type="date" id="date1"><br>
+        Дата 2: <input type="date" id="date2">
+    </td>
+    <td><button onclick="task7()">Виконати</button></td>
+    <td id="result7"></td>
+</tr>
+
+<!-- 8 -->
+<tr>
+    <td>8. Форматування дати</td>
+    <td><button onclick="task8()">Виконати</button></td>
+    <td id="result8"></td>
+</tr>
+
+<!-- 9 -->
+<tr>
+    <td>
+        9. Створити Date з рядка <br>
+        <input type="text" id="dateString" placeholder="12.03.2017">
+    </td>
+    <td><button onclick="task9()">Виконати</button></td>
+    <td id="result9"></td>
+</tr>
+
+<!-- 10 -->
+<tr>
+    <td>
+        10. Дата мовою <br>
+        Код мови: <input type="text" id="lang" placeholder="uk">
+    </td>
+    <td><button onclick="task10()">Виконати</button></td>
+    <td id="result10"></td>
+</tr>
+
+</table>
+
+</body>
+</html>
