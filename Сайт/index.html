@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>NexCRM — Client Management System</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sb-brand">
+            <div class="sb-logo">⚡</div>
+            <div class="sb-name">NexCRM</div>
+        </div>
+        
+        <nav class="nav-list">
+            <div class="nav-item active" onclick="goPage('dashboard')">
+                <span class="nav-icon">📊</span> Дашборд
+            </div>
+            <div class="nav-item" onclick="goPage('clients')">
+                <span class="nav-icon">👥</span> Клієнти
+            </div>
+            <div class="nav-item" onclick="goPage('contacts')">
+                <span class="nav-icon">✉️</span> Повідомлення
+            </div>
+            <div class="nav-item" onclick="goPage('admin')">
+                <span class="nav-icon">⚙️</span> Адмін-панель
+            </div>
+        </nav>
+
+        <div class="sb-user">
+            <div class="user-avatar">AD</div>
+            <div class="user-info">
+                <div class="user-name">Admin User</div>
+                <div class="user-role">System Manager</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <section id="page-dashboard" class="page">
+            <header class="page-header">
+                <h1 class="page-title">Дашборд</h1>
+            </header>
+            <div id="dashboard-content">
+                </div>
+        </section>
+
+        <section id="page-clients" class="page" style="display:none;">
+            <header class="page-header">
+                <h1 class="page-title">База клієнтів</h1>
+                <button class="btn btn-primary" onclick="openClientModal()">+ Додати клієнта</button>
+            </header>
+            <div class="card">
+                <div id="clients-table-container">
+                    </div>
+            </div>
+        </section>
+
+        <section id="page-contacts" class="page" style="display:none;">
+            <header class="page-header">
+                <h1 class="page-title">Зворотний зв'язок</h1>
+            </header>
+            <div id="contacts-list"></div>
+        </section>
+
+        <section id="page-admin" class="page" style="display:none;">
+            <header class="page-header">
+                <h1 class="page-title">Налаштування системи</h1>
+            </header>
+            <div class="card">
+                <button class="btn btn-danger" onclick="clearAllData()">Видалити всі дані</button>
+                <button class="btn" onclick="seedDemoData()">Завантажити демо-дані</button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="sb-brand" style="padding:0; border:none; margin-bottom:15px;">
+                        <div class="sb-logo">⚡</div>
+                        <div class="sb-name">NexCRM</div>
+                    </div>
+                    <p>Система автоматизації бізнес-процесів та керування клієнтською базою.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Навігація</h4>
+                    <ul class="footer-links">
+                        <li><a onclick="goPage('dashboard')">Головна</a></li>
+                        <li><a onclick="goPage('clients')">Клієнти</a></li>
+                        <li><a onclick="goPage('contacts')">Повідомлення</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Контакти</h4>
+                    <p>📍 Київ, Україна</p>
+                    <p>✉ hello@nexcrm.ua</p>
+                    <p>📞 +380 44 123 45 67</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>NexCRM &copy; 2026 | Developed for efficiency</div>
+                <div>У базі: <span id="footer-count">0</span> записів</div>
+            </div>
+        </footer>
+    </main>
+
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h2 id="modal-title">Клієнт</h2>
+            <div id="modal-body">
+                </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

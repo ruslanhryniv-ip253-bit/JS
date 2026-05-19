@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexCRM — Client Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — Refined Industrial Dark
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:        #0b0c0f;
+  --surface:   #131519;
+  --raised:    #1a1d24;
+  --overlay:   #22262f;
+  --border:    #2a2f3d;
+  --border2:   #363d50;
+  --tx1:       #eef0f6;
+  --tx2:       #8c92a4;
+  --tx3:       #4d5468;
+  --acc:       #f0a500;
+  --acc-dim:   #b87c00;
+  --acc-glow:  rgba(240,165,0,.16);
+  --acc-sub:   rgba(240,165,0,.07);
+  --ok:        #3ecf72;
+  --ok-bg:     rgba(62,207,114,.1);
+  --err:       #e05353;
+  --err-bg:    rgba(224,83,83,.1);
+  --info:      #5b9cf6;
+  --info-bg:   rgba(91,156,246,.1);
+  --fD: 'Syne',sans-serif;
+  --fB: 'DM Sans',sans-serif;
+  --fM: 'DM Mono',monospace;
+  --r1:4px; --r2:8px; --r3:12px; --r4:20px;
+  --sh: 0 8px 32px rgba(0,0,0,.55);
+  --nav:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fB);background:var(--bg);color:var(--tx1);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--nav);flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;z-index:200;
+  transition:transform .25s ease;
+}
+.sb-brand{
+  padding:20px 18px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo{
+  width:34px;height:34px;background:var(--acc);border-radius:var(--r2);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.sb-name{font-family:var(--fD);font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
+.sb-sub{font-family:var(--fM);font-size:.6rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px}
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav-sec{font-family:var(--fM);font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--tx3);padding:12px 18px 4px}
+.nav-link{
+  display:flex;align-items:center;gap:10px;padding:10px 18px;
+  color:var(--tx2);font-size:.875rem;font-weight:500;cursor:pointer;
+  border-left:3px solid transparent;transition:all .15s ease;user-select:none;
+}
+.nav-link:hover{background:var(--raised);color:var(--tx1)}
+.nav-link.active{color:var(--acc);background:var(--acc-sub);border-left-color:var(--acc)}
+.nav-link .ni{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.sb-foot{padding:14px 18px;border-top:1px solid var(--border);font-family:var(--fM);font-size:.65rem;color:var(--tx3)}
+
+/* ── MAIN ── */
+.main{flex:1;margin-left:var(--nav);display:flex;flex-direction:column;min-height:100vh}
+.topbar{
+  height:56px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;position:sticky;top:0;z-index:100;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.hamburger{display:none;background:none;border:none;color:var(--tx1);font-size:1.3rem;cursor:pointer;padding:4px}
+.page-title{font-family:var(--fD);font-size:.95rem;font-weight:600;color:var(--tx2)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-badge{
+  background:var(--acc-sub);color:var(--acc);border:1px solid var(--acc-glow);
+  border-radius:var(--r4);padding:3px 10px;font-family:var(--fM);font-size:.68rem;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+
+/* ── PAGE ── */
+.page{display:none;flex-direction:column;flex:1;padding:28px;animation:fadeUp .3s ease}
+.page.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.page-header h1{font-family:var(--fD);font-size:clamp(1.5rem,3vw,2rem);font-weight:800}
+.page-header p{font-size:.875rem;color:var(--tx2);margin-top:4px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);
+  padding:20px;position:relative;overflow:hidden;transition:all .2s ease;cursor:default;
+}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--acc);transform:scaleX(0);transition:transform .2s ease;transform-origin:left}
+.stat-card:hover::after{transform:scaleX(1)}
+.stat-icon{font-size:1.1rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;background:var(--overlay);border-radius:var(--r2);flex-shrink:0}
+.stat-val{font-family:var(--fD);font-size:1.9rem;font-weight:800;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.stat-lbl{font-family:var(--fM);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);padding:22px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.card-hd h3{font-family:var(--fD);font-size:1rem;font-weight:700}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r2);
+  font-family:var(--fB);font-size:.855rem;font-weight:600;cursor:pointer;border:none;
+  transition:all .15s ease;white-space:nowrap;text-decoration:none;line-height:1;
+}
+.btn-primary{background:var(--acc);color:#000}
+.btn-primary:hover{background:var(--acc-dim);box-shadow:0 0 18px var(--acc-glow)}
+.btn-secondary{background:var(--raised);color:var(--tx1);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--overlay);border-color:var(--border2)}
+.btn-danger{background:var(--err-bg);color:var(--err);border:1px solid var(--err)}
+.btn-danger:hover{background:var(--err);color:#fff}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid transparent}
+.btn-ghost:hover{background:var(--raised);color:var(--tx1)}
+.btn-sm{padding:6px 12px;font-size:.78rem}
+.btn-icon{padding:7px;border-radius:var(--r1)}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-family:var(--fM);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);margin-bottom:6px;font-weight:500}
+.form-input,.form-textarea,.form-select{
+  width:100%;background:var(--raised);border:1px solid var(--border);border-radius:var(--r2);
+  padding:10px 14px;color:var(--tx1);font-family:var(--fB);font-size:.9rem;
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-glow);
+}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--tx3)}
+.form-textarea{resize:vertical;min-height:110px}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238c92a4' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-err{font-size:.75rem;color:var(--err);margin-top:5px;display:none}
+.form-group.err .form-input,.form-group.err .form-textarea{border-color:var(--err);box-shadow:0 0 0 3px var(--err-bg)}
+.form-group.err .form-err{display:block}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r3);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--raised)}
+th{padding:11px 16px;text-align:left;font-family:var(--fM);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:.875rem;color:var(--tx2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--raised)}
+.td-p{color:var(--tx1);font-weight:500}
+.td-m{font-family:var(--fM);font-size:.78rem}
+.td-actions{display:flex;gap:6px;align-items:center}
+
+/* ── AVATAR ── */
+.av{
+  width:34px;height:34px;border-radius:var(--r2);background:var(--overlay);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fD);font-weight:700;font-size:.8rem;color:var(--acc);flex-shrink:0;
+}
+.av-lg{width:56px;height:56px;font-size:1.2rem;border-radius:var(--r3)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r4);font-size:.65rem;font-weight:600;font-family:var(--fM);text-transform:uppercase;letter-spacing:.06em}
+.badge-ok{background:var(--ok-bg);color:var(--ok)}
+.badge-err{background:var(--err-bg);color:var(--err)}
+.badge-info{background:var(--info-bg);color:var(--info)}
+.badge-acc{background:var(--acc-sub);color:var(--acc)}
+
+/* ── MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);
+  z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .22s ease;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--r4);
+  padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+  transform:translateY(16px) scale(.97);transition:transform .22s ease;box-shadow:var(--sh);
+}
+.modal-bg.open .modal{transform:translateY(0) scale(1)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-hd h3{font-family:var(--fD);font-size:1.15rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:1.2rem;padding:2px;transition:color .12s;line-height:1}
+.modal-close:hover{color:var(--tx1)}
+.modal-ft{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{
+  background:var(--raised);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:.875rem;font-weight:500;
+  min-width:260px;box-shadow:var(--sh);pointer-events:all;
+  animation:tIn .28s ease forwards;
+}
+.toast.removing{animation:tOut .28s ease forwards}
+.toast.ok{border-left:3px solid var(--ok)}
+.toast.err{border-left:3px solid var(--err)}
+.toast.info{border-left:3px solid var(--info)}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tOut{to{transform:translateX(110%);opacity:0}}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;flex:1;max-width:320px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none}
+.search-input{
+  width:100%;background:var(--raised);border:1px solid var(--border);border-radius:var(--r4);
+  padding:8px 14px 8px 34px;color:var(--tx1);font-family:var(--fB);font-size:.875rem;outline:none;
+  transition:border-color .15s;
+}
+.search-input:focus{border-color:var(--acc)}
+.search-input::placeholder{color:var(--tx3)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px}
+.empty-icon{font-size:3rem;opacity:.35;display:block;margin-bottom:14px}
+.empty h3{font-size:1rem;color:var(--tx2);margin-bottom:6px}
+.empty p{font-size:.85rem;color:var(--tx3)}
+
+/* ── DETAIL VIEW ── */
+.detail-grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+.info-row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-lbl{font-family:var(--fM);font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);min-width:90px;padding-top:2px}
+.info-val{color:var(--tx1);font-size:.9rem;flex:1;word-break:break-word}
+
+/* ── DASHBOARD RECENT ── */
+.recent-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.recent-row:last-child{border-bottom:none}
+.recent-info{flex:1;min-width:0}
+.recent-name{font-weight:600;font-size:.9rem;color:var(--tx1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-meta{font-size:.78rem;color:var(--tx3);font-family:var(--fM)}
+
+/* ── FOOTER ── */
+.footer{padding:14px 28px;border-top:1px solid var(--border);font-family:var(--fM);font-size:.65rem;color:var(--tx3);display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--sh)}
+  .main{margin-left:0}
+  .hamburger{display:block}
+  .detail-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .page{padding:18px}
+}
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .hide-mobile{display:none!important}
+}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:18px 0}
+
+/* ── CONFIRM MODAL ── */
+.confirm-icon{font-size:2.4rem;display:block;text-align:center;margin-bottom:12px}
+.confirm-msg{text-align:center;color:var(--tx2);margin-bottom:6px;font-size:.9rem}
+
+/* ── PASSWORD GATE ── */
+.pw-gate{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
+  z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.pw-gate.open{opacity:1;pointer-events:all}
+.pw-box{
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--r4);
+  padding:32px 28px;width:100%;max-width:380px;box-shadow:var(--sh);
+  transform:translateY(14px) scale(.97);transition:transform .25s ease;
+}
+.pw-gate.open .pw-box{transform:translateY(0) scale(1)}
+.pw-lock{
+  width:52px;height:52px;background:var(--acc-sub);border:1px solid var(--acc-glow);
+  border-radius:var(--r3);display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;margin:0 auto 18px;
+}
+.pw-title{font-family:var(--fD);font-size:1.2rem;font-weight:800;text-align:center;margin-bottom:6px}
+.pw-sub{font-size:.82rem;color:var(--tx3);text-align:center;font-family:var(--fM);margin-bottom:24px}
+.pw-input-wrap{position:relative;margin-bottom:10px}
+.pw-input{
+  width:100%;background:var(--raised);border:1px solid var(--border);border-radius:var(--r2);
+  padding:11px 42px 11px 14px;color:var(--tx1);font-family:var(--fM);font-size:1rem;
+  outline:none;transition:border-color .15s,box-shadow .15s;letter-spacing:.12em;
+}
+.pw-input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-glow)}
+.pw-input.shake{animation:shake .35s ease}
+.pw-input.wrong{border-color:var(--err);box-shadow:0 0 0 3px var(--err-bg)}
+.pw-eye{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.9rem;
+  transition:color .12s;padding:2px;
+}
+.pw-eye:hover{color:var(--tx1)}
+.pw-err{font-size:.78rem;color:var(--err);text-align:center;min-height:18px;margin-bottom:10px;font-family:var(--fM)}
+.pw-btn{
+  width:100%;padding:11px;background:var(--acc);color:#000;border:none;border-radius:var(--r2);
+  font-family:var(--fD);font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.pw-btn:hover{background:var(--acc-dim);box-shadow:0 0 20px var(--acc-glow)}
+.pw-cancel{
+  width:100%;margin-top:10px;padding:8px;background:transparent;color:var(--tx3);
+  border:1px solid transparent;border-radius:var(--r2);font-family:var(--fB);
+  font-size:.82rem;cursor:pointer;transition:all .15s;
+}
+.pw-cancel:hover{color:var(--tx1);border-color:var(--border)}
+.pw-hint{font-size:.7rem;color:var(--tx3);text-align:center;margin-top:14px;font-family:var(--fM)}
+.pw-hint span{color:var(--acc)}
+.pw-attempts{
+  display:flex;justify-content:center;gap:5px;margin-bottom:16px;
+}
+.pw-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .2s;
+}
+.pw-dot.filled{background:var(--acc)}
+.pw-dot.wrong{background:var(--err)}
+.nav-link .lock-badge{
+  margin-left:auto;font-size:.6rem;background:var(--acc-sub);color:var(--acc);
+  border-radius:3px;padding:1px 5px;font-family:var(--fM);
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ SIDEBAR ════════════ -->
+<div class="shell">
+<nav class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">⚡</div>
+    <div>
+      <div class="sb-name">NexCRM</div>
+      <div class="sb-sub">Client Management</div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div class="nav-sec">Main</div>
+    <div class="nav-link active" data-page="dashboard">
+      <span class="ni">◈</span> Dashboard
+    </div>
+    <div class="nav-link" data-page="clients">
+      <span class="ni">◉</span> Clients
+    </div>
+    <div class="nav-link" data-page="client-detail">
+      <span class="ni">◎</span> Client Profile
+    </div>
+    <div class="nav-sec">System</div>
+    <div class="nav-link" data-page="contacts">
+      <span class="ni">✉</span> Contact Form
+    </div>
+    <div class="nav-link" data-page="admin">
+      <span class="ni">⚙</span> Admin Panel <span class="lock-badge">🔒</span>
+    </div>
+  </div>
+  <div class="sb-foot">v1.0.0 · localStorage</div>
+</nav>
+
+<!-- ════════════ MAIN ════════════ -->
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburger">☰</button>
+      <span class="page-title" id="topbar-title">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge" id="topbar-badge">● Live</span>
+    </div>
+  </header>
+
+  <!-- ── DASHBOARD ── -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Загальний огляд системи управління клієнтами</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">＋ Новий клієнт</button>
+    </div>
+    <div class="stats-grid" id="dash-stats">
+      <!-- rendered by JS -->
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1" id="dash-cols">
+      <div class="card">
+        <div class="card-hd">
+          <h3>Останні клієнти</h3>
+          <button class="btn btn-ghost btn-sm" onclick="goPage('clients')">Всі →</button>
+        </div>
+        <div id="dash-recent"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <h3>Нові заявки</h3>
+          <button class="btn btn-ghost btn-sm" onclick="goPage('admin')">Всі →</button>
+        </div>
+        <div id="dash-contacts"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLIENTS ── -->
+  <section class="page" id="page-clients">
+    <div class="page-header">
+      <div>
+        <h1>Клієнти</h1>
+        <p>Повна база клієнтів</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">＋ Додати клієнта</button>
+    </div>
+    <div class="card">
+      <div class="card-hd" style="flex-wrap:wrap;gap:10px">
+        <h3 id="clients-count">Всі клієнти</h3>
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="search-input" placeholder="Пошук за іменем, email..." oninput="renderClientsTable()"/>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Клієнт</th>
+              <th class="hide-mobile">Email</th>
+              <th class="hide-mobile">Компанія</th>
+              <th class="hide-mobile">Телефон</th>
+              <th>Дата</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="clients-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLIENT DETAIL ── -->
+  <section class="page" id="page-client-detail">
+    <div class="page-header">
+      <div>
+        <button class="btn btn-ghost btn-sm" onclick="goPage('clients')" style="margin-bottom:8px">← Назад до списку</button>
+        <h1 id="detail-name">—</h1>
+        <p id="detail-company">—</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" id="detail-edit-btn">✎ Редагувати</button>
+        <button class="btn btn-danger" id="detail-delete-btn">✕ Видалити</button>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="card">
+        <div class="card-hd"><h3>Інформація про клієнта</h3></div>
+        <div id="detail-info"></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="card-hd"><h3>Статистика</h3></div>
+          <div id="detail-stats"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Нотатки</h3></div>
+          <p id="detail-notes" style="font-size:.875rem;color:var(--tx2);line-height:1.7"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACTS ── -->
+  <section class="page" id="page-contacts">
+    <div class="page-header">
+      <div>
+        <h1>Контактна форма</h1>
+        <p>Надішліть нам повідомлення — ми відповімо якнайшвидше</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" class="contact-cols">
+      <div class="card">
+        <div class="card-hd"><h3>Нове повідомлення</h3></div>
+        <form id="contact-form" onsubmit="submitContactForm(event)">
+          <div class="form-group" id="cg-name">
+            <label class="form-label">Ваше ім'я *</label>
+            <input class="form-input" id="cf-name" placeholder="Іван Петренко"/>
+            <div class="form-err">Введіть ваше ім'я</div>
+          </div>
+          <div class="form-group" id="cg-email">
+            <label class="form-label">Email *</label>
+            <input class="form-input" id="cf-email" type="email" placeholder="ivan@example.com"/>
+            <div class="form-err">Введіть коректний email</div>
+          </div>
+          <div class="form-group" id="cg-msg">
+            <label class="form-label">Повідомлення *</label>
+            <textarea class="form-textarea" id="cf-message" placeholder="Опишіть ваш запит..."></textarea>
+            <div class="form-err">Введіть повідомлення</div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">✉ Надіслати повідомлення</button>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>Контактна інформація</h3></div>
+        <div style="display:flex;flex-direction:column;gap:18px;padding-top:4px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:1.5rem;margin-top:2px">📍</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;margin-bottom:3px">Адреса</div>
+              <div style="color:var(--tx2);font-size:.875rem">вул. Незалежності 1, Київ, Україна</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:1.5rem;margin-top:2px">📞</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;margin-bottom:3px">Телефон</div>
+              <div style="color:var(--tx2);font-size:.875rem">+38 (044) 123-45-67</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:1.5rem;margin-top:2px">✉️</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;margin-bottom:3px">Email</div>
+              <div style="color:var(--tx2);font-size:.875rem">hello@nexcrm.ua</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:1.5rem;margin-top:2px">🕐</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;margin-bottom:3px">Години роботи</div>
+              <div style="color:var(--tx2);font-size:.875rem">Пн–Пт: 9:00 – 18:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ADMIN ── -->
+  <section class="page" id="page-admin">
+    <div class="page-header">
+      <div>
+        <h1>Адмін-панель</h1>
+        <p>Управління клієнтами та перегляд заявок</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="logoutAdmin()">🔒 Вийти</button>
+        <button class="btn btn-secondary btn-sm" onclick="seedDemoData()">⚡ Demo дані</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">✕ Очистити все</button>
+      </div>
+    </div>
+    <div class="stats-grid" id="admin-stats"></div>
+    <div style="display:grid;gap:18px">
+      <div class="card">
+        <div class="card-hd">
+          <h3>Всі клієнти</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ Додати</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Клієнт</th>
+                <th class="hide-mobile">Email</th>
+                <th class="hide-mobile">Компанія</th>
+                <th>Дата</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody id="admin-clients-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <h3>Заявки з форми</h3>
+          <span class="badge badge-info" id="submissions-count">0</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ім'я</th>
+                <th class="hide-mobile">Email</th>
+                <th>Повідомлення</th>
+                <th>Дата</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody id="admin-submissions-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>NexCRM © 2025</span>
+    <span id="footer-storage">localStorage · <span id="footer-count">0</span> clients</span>
+  </footer>
+</main>
+</div>
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Add / Edit Client Modal -->
+<div class="modal-bg" id="modal-client">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="modal-client-title">Новий клієнт</h3>
+      <button class="modal-close" onclick="closeModal('modal-client')">✕</button>
+    </div>
+    <input type="hidden" id="edit-id"/>
+    <div class="form-row">
+      <div class="form-group" id="mg-name">
+        <label class="form-label">Ім'я *</label>
+        <input class="form-input" id="m-name" placeholder="Іван Петренко"/>
+        <div class="form-err">Обов'язкове поле</div>
+      </div>
+      <div class="form-group" id="mg-email">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="m-email" type="email" placeholder="ivan@example.com"/>
+        <div class="form-err">Введіть коректний email</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="mg-phone">
+        <label class="form-label">Телефон</label>
+        <input class="form-input" id="m-phone" placeholder="+380 50 123 4567"/>
+        <div class="form-err">Некоректний формат</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Компанія</label>
+        <input class="form-input" id="m-company" placeholder="ТОВ «Приклад»"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Нотатки</label>
+      <textarea class="form-textarea" id="m-notes" placeholder="Будь-яка додаткова інформація..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-client')">Скасувати</button>
+      <button class="btn btn-primary" onclick="saveClientModal()">💾 Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-bg" id="modal-confirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-hd">
+      <h3 id="confirm-title">Підтвердження</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">✕</button>
+    </div>
+    <span class="confirm-icon" id="confirm-icon">⚠️</span>
+    <p class="confirm-msg" id="confirm-msg">Ви впевнені?</p>
+    <p style="text-align:center;font-size:.8rem;color:var(--tx3)" id="confirm-sub"></p>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Скасувати</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Так, видалити</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PASSWORD GATE ════════════ -->
+<div class="pw-gate" id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-lock">🔐</div>
+    <div class="pw-title">Адмін-панель</div>
+    <div class="pw-sub">Введіть пароль для доступу</div>
+    <div class="pw-attempts" id="pw-attempts">
+      <div class="pw-dot" id="pw-d0"></div>
+      <div class="pw-dot" id="pw-d1"></div>
+      <div class="pw-dot" id="pw-d2"></div>
+    </div>
+    <div class="pw-input-wrap">
+      <input class="pw-input" id="pw-input" type="password" placeholder="••••••••" maxlength="32"
+        onkeydown="if(event.key==='Enter') checkPassword()"
+        oninput="onPwInput()"/>
+      <button class="pw-eye" id="pw-eye" onclick="togglePwEye()" title="Показати/Приховати">👁</button>
+    </div>
+    <div class="pw-err" id="pw-err"></div>
+    <button class="pw-btn" onclick="checkPassword()">Увійти →</button>
+    <button class="pw-cancel" onclick="closePwGate()">Скасувати</button>
+    <div class="pw-hint">Підказка: пароль — <span>admin123</span></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div id="toasts"></div>
+
+<!-- Sidebar overlay for mobile -->
+<div id="sb-overlay" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.5)" onclick="closeSidebar()"></div>
+
+<script>
+/* ═══════════════════════════════════
+   DATA LAYER — localStorage
+   ═══════════════════════════════════ */
+
+const CLIENTS_KEY = 'nex_clients';
+const CONTACTS_KEY = 'nex_contacts';
+
+function uuid() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : r & 0x3 | 0x8).toString(16);
+      });
+}
+
+// ── Clients ──
+function getClients() {
+  try { return JSON.parse(localStorage.getItem(CLIENTS_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveClients(list) { localStorage.setItem(CLIENTS_KEY, JSON.stringify(list)); }
+
+function createClient(data) {
+  const client = { id: uuid(), name: '', email: '', phone: '', company: '', notes: '', createdAt: new Date().toISOString(), ...data };
+  const list = getClients();
+  list.unshift(client);
+  saveClients(list);
+  return client;
+}
+function updateClient(id, data) {
+  const list = getClients();
+  const idx = list.findIndex(c => c.id === id);
+  if (idx < 0) return null;
+  list[idx] = { ...list[idx], ...data };
+  saveClients(list);
+  return list[idx];
+}
+function deleteClientById(id) {
+  const list = getClients().filter(c => c.id !== id);
+  saveClients(list);
+}
+function getClientById(id) { return getClients().find(c => c.id === id) || null; }
+
+// ── Contacts ──
+function getContacts() {
+  try { return JSON.parse(localStorage.getItem(CONTACTS_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveContact(data) {
+  const list = getContacts();
+  list.unshift({ id: uuid(), ...data, submittedAt: new Date().toISOString() });
+  localStorage.setItem(CONTACTS_KEY, JSON.stringify(list));
+}
+function deleteContact(id) {
+  const list = getContacts().filter(s => s.id !== id);
+  localStorage.setItem(CONTACTS_KEY, JSON.stringify(list));
+}
+
+/* ═══════════════════════════════════
+   ROUTING / NAVIGATION
+   ═══════════════════════════════════ */
+
+let currentPage = 'dashboard';
+let currentDetailId = null;
+let adminAuthenticated = false;
+
+const ADMIN_PASSWORD = 'admin123'; // Change this to your desired password
+const SESSION_KEY = 'nex_admin_auth';
+
+// Check if already authenticated this session
+function isAdminAuthed() {
+  return adminAuthenticated || sessionStorage.getItem(SESSION_KEY) === '1';
+}
+function setAdminAuthed() {
+  adminAuthenticated = true;
+  sessionStorage.setItem(SESSION_KEY, '1');
+}
+function revokeAdminAuth() {
+  adminAuthenticated = false;
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+/* ── Password Gate ── */
+let pwAttempts = 0;
+const MAX_ATTEMPTS = 3;
+let pwPendingPage = null;
+
+function openPwGate(targetPage) {
+  pwPendingPage = targetPage;
+  pwAttempts = 0;
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-err').textContent = '';
+  document.getElementById('pw-input').classList.remove('wrong','shake');
+  resetDots();
+  document.getElementById('pw-gate').classList.add('open');
+  setTimeout(() => document.getElementById('pw-input').focus(), 200);
+}
+
+function closePwGate() {
+  document.getElementById('pw-gate').classList.remove('open');
+  pwPendingPage = null;
+}
+
+function onPwInput() {
+  const input = document.getElementById('pw-input');
+  input.classList.remove('wrong', 'shake');
+  document.getElementById('pw-err').textContent = '';
+  // Animate dots as user types
+  const len = Math.min(input.value.length, 3);
+  for (let i = 0; i < 3; i++) {
+    const d = document.getElementById('pw-d' + i);
+    d.classList.toggle('filled', i < len);
+    d.classList.remove('wrong');
+  }
+}
+
+function resetDots() {
+  for (let i = 0; i < 3; i++) {
+    const d = document.getElementById('pw-d' + i);
+    d.classList.remove('filled', 'wrong');
+  }
+}
+
+function checkPassword() {
+  const val = document.getElementById('pw-input').value;
+  const input = document.getElementById('pw-input');
+  const errEl = document.getElementById('pw-err');
+
+  if (!val.trim()) {
+    errEl.textContent = 'Введіть пароль';
+    input.focus();
+    return;
+  }
+
+  if (val === ADMIN_PASSWORD) {
+    setAdminAuthed();
+    closePwGate();
+    toast('Доступ дозволено ✓', 'ok');
+    if (pwPendingPage) goPage(pwPendingPage);
+  } else {
+    pwAttempts++;
+    input.classList.add('wrong', 'shake');
+    // Turn dots red
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('pw-d' + i).classList.add('wrong');
+    }
+    setTimeout(() => {
+      input.classList.remove('shake');
+    }, 400);
+
+    const left = MAX_ATTEMPTS - pwAttempts;
+    if (left > 0) {
+      errEl.textContent = `Невірний пароль. Залишилось спроб: ${left}`;
+    } else {
+      errEl.textContent = 'Забагато спроб. Спробуйте пізніше.';
+      document.getElementById('pw-input').disabled = true;
+      document.querySelector('.pw-btn').disabled = true;
+      setTimeout(() => {
+        document.getElementById('pw-input').disabled = false;
+        document.querySelector('.pw-btn').disabled = false;
+        pwAttempts = 0;
+        input.value = '';
+        errEl.textContent = '';
+        resetDots();
+        input.classList.remove('wrong');
+        input.focus();
+      }, 5000);
+    }
+    input.select();
+  }
+}
+
+function togglePwEye() {
+  const input = document.getElementById('pw-input');
+  const eye = document.getElementById('pw-eye');
+  if (input.type === 'password') {
+    input.type = 'text';
+    eye.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    eye.textContent = '👁';
+  }
+}
+
+// Close gate on backdrop click
+document.getElementById('pw-gate').addEventListener('click', function(e) {
+  if (e.target === this) closePwGate();
+});
+
+const PAGE_TITLES = {
+  dashboard: 'Dashboard',
+  clients: 'Клієнти',
+  'client-detail': 'Профіль клієнта',
+  contacts: 'Контактна форма',
+  admin: 'Адмін-панель',
+};
+
+function goPage(page, id = null) {
+  // Guard admin page with password
+  if (page === 'admin' && !isAdminAuthed()) {
+    openPwGate('admin');
+    return;
+  }
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+  const el = document.getElementById('page-' + page);
+  if (!el) return;
+  el.classList.add('active');
+
+  const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[page] || page;
+  currentPage = page;
+
+  if (page === 'client-detail' && id) {
+    currentDetailId = id;
+    renderDetailPage(id);
+  } else if (page === 'dashboard') {
+    renderDashboard();
+  } else if (page === 'clients') {
+    renderClientsTable();
+  } else if (page === 'admin') {
+    renderAdminPage();
+  }
+
+  closeSidebar();
+  updateFooter();
+}
+
+document.querySelectorAll('.nav-link').forEach(l => {
+  l.addEventListener('click', () => goPage(l.dataset.page));
+});
+
+/* ═══════════════════════════════════
+   SIDEBAR MOBILE
+   ═══════════════════════════════════ */
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sb-overlay').style.display = 'block';
+});
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').style.display = 'none';
+}
+
+/* ═══════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════ */
+function initials(name) {
+  return (name || '?').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('uk-UA', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function truncate(s, n = 60) {
+  return s && s.length > n ? s.slice(0, n) + '…' : (s || '');
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+function isPhone(s) { return !s || /^[+\d\s\-().]{7,20}$/.test(s); }
+
+/* ═══════════════════════════════════
+   TOAST
+   ═══════════════════════════════════ */
+function toast(msg, type = 'info') {
+  const icons = { ok: '✓', err: '✕', info: 'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${esc(msg)}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => {
+    el.classList.add('removing');
+    setTimeout(() => el.remove(), 300);
+  }, 2800);
+}
+
+/* ═══════════════════════════════════
+   MODALS
+   ═══════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on backdrop click
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+
+/* ═══════════════════════════════════
+   CLIENT MODAL (Add / Edit)
+   ═══════════════════════════════════ */
+function openAddModal() {
+  document.getElementById('modal-client-title').textContent = 'Новий клієнт';
+  document.getElementById('edit-id').value = '';
+  ['m-name','m-email','m-phone','m-company','m-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  clearFormErrors(['mg-name','mg-email','mg-phone']);
+  openModal('modal-client');
+}
+
+function openEditModal(id) {
+  const c = getClientById(id);
+  if (!c) return;
+  document.getElementById('modal-client-title').textContent = 'Редагувати клієнта';
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('m-name').value    = c.name    || '';
+  document.getElementById('m-email').value   = c.email   || '';
+  document.getElementById('m-phone').value   = c.phone   || '';
+  document.getElementById('m-company').value = c.company || '';
+  document.getElementById('m-notes').value   = c.notes   || '';
+  clearFormErrors(['mg-name','mg-email','mg-phone']);
+  openModal('modal-client');
+}
+
+function saveClientModal() {
+  const name    = document.getElementById('m-name').value.trim();
+  const email   = document.getElementById('m-email').value.trim();
+  const phone   = document.getElementById('m-phone').value.trim();
+  const company = document.getElementById('m-company').value.trim();
+  const notes   = document.getElementById('m-notes').value.trim();
+
+  clearFormErrors(['mg-name','mg-email','mg-phone']);
+  let valid = true;
+  if (!name)           { setErr('mg-name', 'Введіть ім\'я клієнта');     valid = false; }
+  if (!email || !isEmail(email)) { setErr('mg-email', 'Введіть коректний email'); valid = false; }
+  if (!isPhone(phone)) { setErr('mg-phone', 'Некоректний номер телефону'); valid = false; }
+  if (!valid) return;
+
+  const id = document.getElementById('edit-id').value;
+  if (id) {
+    updateClient(id, { name, email, phone, company, notes });
+    toast('Клієнта оновлено', 'ok');
+  } else {
+    createClient({ name, email, phone, company, notes });
+    toast('Клієнта додано', 'ok');
+  }
+  closeModal('modal-client');
+  refreshCurrentPage();
+}
+
+function setErr(groupId, msg) {
+  const g = document.getElementById(groupId);
+  if (!g) return;
+  g.classList.add('err');
+  const e = g.querySelector('.form-err');
+  if (e) e.textContent = msg;
+}
+function clearFormErrors(groups) {
+  groups.forEach(id => {
+    const g = document.getElementById(id);
+    if (g) g.classList.remove('err');
+  });
+}
+
+/* ═══════════════════════════════════
+   CONFIRM MODAL
+   ═══════════════════════════════════ */
+function confirmAction({ title, msg, sub, icon = '⚠️', label = 'Так, видалити', onConfirm }) {
+  document.getElementById('confirm-title').textContent = title || 'Підтвердження';
+  document.getElementById('confirm-icon').textContent  = icon;
+  document.getElementById('confirm-msg').textContent   = msg  || 'Ви впевнені?';
+  document.getElementById('confirm-sub').textContent   = sub  || '';
+  document.getElementById('confirm-ok-btn').textContent = label;
+  document.getElementById('confirm-ok-btn').onclick = () => {
+    closeModal('modal-confirm');
+    if (onConfirm) onConfirm();
+  };
+  openModal('modal-confirm');
+}
+
+/* ═══════════════════════════════════
+   RENDER: DASHBOARD
+   ═══════════════════════════════════ */
+function renderDashboard() {
+  const clients  = getClients();
+  const contacts = getContacts();
+
+  // Stats
+  const today = new Date().toDateString();
+  const newToday = clients.filter(c => new Date(c.createdAt).toDateString() === today).length;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <span class="stat-icon">◉</span>
+      <div class="stat-val">${clients.length}</div>
+      <div class="stat-lbl">Всього клієнтів</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">✉</span>
+      <div class="stat-val">${contacts.length}</div>
+      <div class="stat-lbl">Заявок</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⚡</span>
+      <div class="stat-val">${newToday}</div>
+      <div class="stat-lbl">Нових сьогодні</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">◈</span>
+      <div class="stat-val">${clients.filter(c=>c.company).length}</div>
+      <div class="stat-lbl">З компанією</div>
+    </div>
+  `;
+
+  // Recent clients
+  const recent = clients.slice(0, 6);
+  document.getElementById('dash-recent').innerHTML = recent.length
+    ? recent.map(c => `
+        <div class="recent-row" style="cursor:pointer" onclick="goPage('client-detail','${c.id}')">
+          <div class="av">${esc(initials(c.name))}</div>
+          <div class="recent-info">
+            <div class="recent-name">${esc(c.name)}</div>
+            <div class="recent-meta">${esc(c.email)}</div>
+          </div>
+          <div><span class="badge badge-acc">${esc(c.company || 'Особа')}</span></div>
+        </div>
+      `).join('')
+    : '<div class="empty"><span class="empty-icon">◉</span><h3>Немає клієнтів</h3><p>Додайте першого клієнта</p></div>';
+
+  // Recent contacts
+  const recentC = contacts.slice(0, 5);
+  document.getElementById('dash-contacts').innerHTML = recentC.length
+    ? recentC.map(s => `
+        <div class="recent-row">
+          <div class="av" style="background:var(--info-bg);color:var(--info)">${esc(initials(s.name))}</div>
+          <div class="recent-info">
+            <div class="recent-name">${esc(s.name)}</div>
+            <div class="recent-meta">${truncate(s.message, 40)}</div>
+          </div>
+          <div style="font-family:var(--fM);font-size:.65rem;color:var(--tx3);white-space:nowrap">${fmtDate(s.submittedAt)}</div>
+        </div>
+      `).join('')
+    : '<div class="empty"><span class="empty-icon">✉</span><h3>Заявок немає</h3><p>Форма очікує перших звернень</p></div>';
+}
+
+/* ═══════════════════════════════════
+   RENDER: CLIENTS TABLE
+   ═══════════════════════════════════ */
+function renderClientsTable() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const all = getClients();
+  const clients = q
+    ? all.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.company || '').toLowerCase().includes(q))
+    : all;
+
+  document.getElementById('clients-count').textContent =
+    q ? `Знайдено: ${clients.length}` : `Всі клієнти (${all.length})`;
+
+  document.getElementById('clients-tbody').innerHTML = clients.length
+    ? clients.map(c => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="av">${esc(initials(c.name))}</div>
+              <div>
+                <div class="td-p" style="cursor:pointer" onclick="goPage('client-detail','${c.id}')">${esc(c.name)}</div>
+              </div>
+            </div>
+          </td>
+          <td class="td-m hide-mobile">${esc(c.email)}</td>
+          <td class="hide-mobile">${c.company ? `<span class="badge badge-acc">${esc(c.company)}</span>` : '<span style="color:var(--tx3)">—</span>'}</td>
+          <td class="td-m hide-mobile">${esc(c.phone || '—')}</td>
+          <td class="td-m" style="color:var(--tx3)">${fmtDate(c.createdAt)}</td>
+          <td>
+            <div class="td-actions">
+              <button class="btn btn-ghost btn-sm btn-icon" title="Переглянути" onclick="goPage('client-detail','${c.id}')">👁</button>
+              <button class="btn btn-ghost btn-sm btn-icon" title="Редагувати" onclick="openEditModal('${c.id}')">✎</button>
+              <button class="btn btn-danger btn-sm btn-icon" title="Видалити" onclick="confirmDeleteClient('${c.id}','${esc(c.name)}')">✕</button>
+            </div>
+          </td>
+        </tr>
+      `).join('')
+    : `<tr><td colspan="6"><div class="empty"><span class="empty-icon">◉</span><h3>Клієнтів не знайдено</h3><p>${q ? 'Спробуйте інший запит' : 'Додайте першого клієнта'}</p></div></td></tr>`;
+}
+
+/* ═══════════════════════════════════
+   RENDER: CLIENT DETAIL
+   ═══════════════════════════════════ */
+function renderDetailPage(id) {
+  const c = getClientById(id);
+  if (!c) { goPage('clients'); return; }
+
+  document.getElementById('detail-name').textContent    = c.name;
+  document.getElementById('detail-company').textContent = c.company || 'Без компанії';
+
+  document.getElementById('detail-info').innerHTML = `
+    <div class="info-row">
+      <div class="info-lbl">Email</div>
+      <div class="info-val"><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
+    </div>
+    <div class="info-row">
+      <div class="info-lbl">Телефон</div>
+      <div class="info-val">${c.phone ? `<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>` : '<span style="color:var(--tx3)">—</span>'}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-lbl">Компанія</div>
+      <div class="info-val">${c.company ? `<span class="badge badge-acc">${esc(c.company)}</span>` : '<span style="color:var(--tx3)">—</span>'}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-lbl">ID</div>
+      <div class="info-val" style="font-family:var(--fM);font-size:.75rem;color:var(--tx3)">${esc(c.id)}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-lbl">Створено</div>
+      <div class="info-val">${fmtDate(c.createdAt)}</div>
+    </div>
+  `;
+
+  document.getElementById('detail-stats').innerHTML = `
+    <div class="info-row">
+      <div class="info-lbl">Статус</div>
+      <div class="info-val"><span class="badge badge-ok">Активний</span></div>
+    </div>
+    <div class="info-row">
+      <div class="info-lbl">Тип</div>
+      <div class="info-val">${c.company ? '<span class="badge badge-info">Бізнес</span>' : '<span class="badge badge-acc">Особа</span>'}</div>
+    </div>
+  `;
+
+  document.getElementById('detail-notes').textContent = c.notes || 'Нотатки відсутні.';
+
+  document.getElementById('detail-edit-btn').onclick   = () => openEditModal(id);
+  document.getElementById('detail-delete-btn').onclick = () => confirmDeleteClient(id, c.name, true);
+}
+
+/* ═══════════════════════════════════
+   RENDER: ADMIN
+   ═══════════════════════════════════ */
+function renderAdminPage() {
+  const clients  = getClients();
+  const contacts = getContacts();
+
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat-card">
+      <span class="stat-icon">◉</span>
+      <div class="stat-val">${clients.length}</div>
+      <div class="stat-lbl">Клієнтів</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">✉</span>
+      <div class="stat-val">${contacts.length}</div>
+      <div class="stat-lbl">Заявок</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🏢</span>
+      <div class="stat-val">${clients.filter(c=>c.company).length}</div>
+      <div class="stat-lbl">Бізнес-клієнтів</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👤</span>
+      <div class="stat-val">${clients.filter(c=>!c.company).length}</div>
+      <div class="stat-lbl">Фізичних осіб</div>
+    </div>
+  `;
+
+  document.getElementById('admin-clients-tbody').innerHTML = clients.length
+    ? clients.map(c => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="av av-sm" style="width:28px;height:28px;font-size:.72rem">${esc(initials(c.name))}</div>
+              <span class="td-p">${esc(c.name)}</span>
+            </div>
+          </td>
+          <td class="td-m hide-mobile">${esc(c.email)}</td>
+          <td class="hide-mobile">${esc(c.company || '—')}</td>
+          <td class="td-m" style="color:var(--tx3)">${fmtDate(c.createdAt)}</td>
+          <td>
+            <div class="td-actions">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditModal('${c.id}')">✎</button>
+              <button class="btn btn-danger btn-sm btn-icon" onclick="confirmDeleteClient('${c.id}','${esc(c.name)}')">✕</button>
+            </div>
+          </td>
+        </tr>
+      `).join('')
+    : `<tr><td colspan="5"><div class="empty"><span class="empty-icon">◉</span><h3>Клієнтів немає</h3></div></td></tr>`;
+
+  document.getElementById('submissions-count').textContent = contacts.length;
+  document.getElementById('admin-submissions-tbody').innerHTML = contacts.length
+    ? contacts.map(s => `
+        <tr>
+          <td class="td-p">${esc(s.name)}</td>
+          <td class="td-m hide-mobile">${esc(s.email)}</td>
+          <td style="max-width:240px">${truncate(esc(s.message), 70)}</td>
+          <td class="td-m" style="color:var(--tx3)">${fmtDate(s.submittedAt)}</td>
+          <td>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="confirmDeleteContact('${s.id}')">✕</button>
+          </td>
+        </tr>
+      `).join('')
+    : `<tr><td colspan="5"><div class="empty"><span class="empty-icon">✉</span><h3>Заявок немає</h3></div></td></tr>`;
+}
+
+/* ═══════════════════════════════════
+   DELETE ACTIONS
+   ═══════════════════════════════════ */
+function confirmDeleteClient(id, name, redirect = false) {
+  confirmAction({
+    title: 'Видалити клієнта',
+    msg: `Видалити "${name}"?`,
+    sub: 'Цю дію неможливо скасувати.',
+    icon: '🗑️',
+    onConfirm: () => {
+      deleteClientById(id);
+      toast(`"${name}" видалено`, 'ok');
+      if (redirect) goPage('clients');
+      else refreshCurrentPage();
+    }
+  });
+}
+
+function confirmDeleteContact(id) {
+  confirmAction({
+    title: 'Видалити заявку',
+    msg: 'Видалити цю заявку?',
+    icon: '🗑️',
+    onConfirm: () => {
+      deleteContact(id);
+      toast('Заявку видалено', 'ok');
+      renderAdminPage();
+    }
+  });
+}
+
+function logoutAdmin() {
+  revokeAdminAuth();
+  goPage('dashboard');
+  toast('Сесію адміна завершено', 'info');
+}
+
+function confirmClearAll() {
+  confirmAction({
+    title: 'Очистити всі дані',
+    msg: 'Видалити всіх клієнтів та заявки?',
+    sub: 'Всі дані буде безповоротно видалено!',
+    icon: '⚠️',
+    label: 'Так, очистити все',
+    onConfirm: () => {
+      localStorage.removeItem(CLIENTS_KEY);
+      localStorage.removeItem(CONTACTS_KEY);
+      toast('Всі дані очищено', 'info');
+      renderAdminPage();
+      updateFooter();
+    }
+  });
+}
+
+/* ═══════════════════════════════════
+   CONTACT FORM
+   ═══════════════════════════════════ */
+function submitContactForm(e) {
+  e.preventDefault();
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const message = document.getElementById('cf-message').value.trim();
+
+  ['cg-name','cg-email','cg-msg'].forEach(id => document.getElementById(id).classList.remove('err'));
+  let valid = true;
+  if (!name)              { document.getElementById('cg-name').classList.add('err');  valid = false; }
+  if (!email || !isEmail(email)) { document.getElementById('cg-email').classList.add('err'); valid = false; }
+  if (!message)           { document.getElementById('cg-msg').classList.add('err');   valid = false; }
+  if (!valid) return;
+
+  saveContact({ name, email, message });
+  e.target.reset();
+  toast('Повідомлення надіслано! Ми зв\'яжемося з вами.', 'ok');
+}
+
+/* ═══════════════════════════════════
+   DEMO DATA
+   ═══════════════════════════════════ */
+function seedDemoData() {
+  const demo = [
+    { name: 'Олена Коваленко', email: 'o.kovalenko@gmail.com', phone: '+380 67 111 2233', company: 'ТОВ «Інновації»', notes: 'VIP-клієнт, пріоритетна підтримка.' },
+    { name: 'Микола Бондаренко', email: 'mykola.b@business.ua', phone: '+380 50 987 6543', company: 'Бондаренко & Партнери', notes: '' },
+    { name: 'Аліна Шевченко', email: 'alina.sh@startup.io', phone: '', company: 'TechStart UA', notes: 'Зацікавлена у преміум плані.' },
+    { name: 'Роман Іванченко', email: 'roman.iv@freelance.com', phone: '+380 93 333 4455', company: '', notes: 'Фрілансер, дизайнер.' },
+    { name: 'Тетяна Мельник', email: 'tanya.m@agency.ua', phone: '+380 44 555 6677', company: 'Digital Agency UA', notes: '' },
+    { name: 'Сергій Петров', email: 's.petrov@corp.com', phone: '+380 66 222 8899', company: 'MegaCorp LLC', notes: 'Потребує технічної консультації.' },
+  ];
+  demo.forEach(d => createClient(d));
+
+  const demoContacts = [
+    { name: 'Дмитро Сидоренко', email: 'd.sydorenko@gmail.com', message: 'Добрий день! Цікавить ваш CRM для нашої компанії. Можемо поговорити?' },
+    { name: 'Ірина Кравченко', email: 'iryna.k@mail.ua', message: 'Хочу дізнатися більше про тарифи та можливості системи.' },
+  ];
+  demoContacts.forEach(d => saveContact(d));
+
+  toast('Demo дані додано!', 'ok');
+  renderAdminPage();
+  updateFooter();
+}
+
+/* ═══════════════════════════════════
+   UTILS
+   ═══════════════════════════════════ */
+function refreshCurrentPage() {
+  if (currentPage === 'clients')       renderClientsTable();
+  else if (currentPage === 'dashboard') renderDashboard();
+  else if (currentPage === 'admin')     renderAdminPage();
+  else if (currentPage === 'client-detail' && currentDetailId) renderDetailPage(currentDetailId);
+  updateFooter();
+}
+
+function updateFooter() {
+  document.getElementById('footer-count').textContent = getClients().length;
+}
+
+/* ═══════════════════════════════════
+   INIT
+   ═══════════════════════════════════ */
+renderDashboard();
+updateFooter();
+</script>
+</body>
+</html>
